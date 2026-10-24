@@ -53,16 +53,23 @@ async function initDb() {
     };
   } else {
     console.log('Connecting to SQLite...');
+    const dbDir = path.join(__dirname, '..', 'database');
+    if (!fs.existsSync(dbDir)) {
+      try { fs.mkdirSync(dbDir, { recursive: true }); } catch (e) {}
+    }
     const { open } = await import('sqlite');
     const sqlite3 = await import('sqlite3');
     db = await open({
-      filename: path.join(__dirname, '..', 'database', 'database.sqlite'),
+      filename: path.join(dbDir, 'database.sqlite'),
       driver: sqlite3.default.Database
     });
   }
 
   // Schema initialization
-  const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
+  let schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
+  if (!fs.existsSync(schemaPath)) {
+    schemaPath = path.join(__dirname, 'schema.sql');
+  }
   if (fs.existsSync(schemaPath)) {
     let schema = fs.readFileSync(schemaPath, 'utf8');
     if (isPostgres) {
@@ -416,8 +423,8 @@ app.post('/api/admin/query', async (req, res) => {
 });
 
 const startServer = (port) => {
-  const server = app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on port ${port} (0.0.0.0)`);
   });
 
   server.on('error', (err) => {
@@ -426,6 +433,7 @@ const startServer = (port) => {
       startServer(port + 1);
     } else {
       console.error('Server error:', err);
+      process.exit(1);
     }
   });
 };
@@ -433,4 +441,7 @@ const startServer = (port) => {
 const INITIAL_PORT = process.env.PORT || 5001;
 initDb().then(() => {
   startServer(INITIAL_PORT);
-}).catch(console.error);
+}).catch((err) => {
+  console.error('Fatal initialization error:', err);
+  process.exit(1);
+});
