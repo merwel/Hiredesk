@@ -430,7 +430,7 @@ const startServer = (port) => {
   });
 };
 
-const INITIAL_PORT = process.env.PORT || 5000;
+const INITIAL_PORT = process.env.PORT || 5001;
 initDb().then(() => {
   startServer(INITIAL_PORT);
 }).catch(console.error);
