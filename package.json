@@ -5,6 +5,17 @@
   "type": "module",
   "scripts": {
     "start": "node server/server.js",
-    "build": "npm --prefix server install"
+    "build": "npm install && npm --prefix server install",
+    "postinstall": "npm --prefix server install"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.13.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   }
 }
